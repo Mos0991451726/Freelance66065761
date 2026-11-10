@@ -4,47 +4,139 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>DigitalWork Solutions — Freelance Escrow DApp</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@500;600;700&family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.4/dist/ethers.umd.min.js"></script>
 <style>
-  :root { --bg:#f4f6fb; --card:#fff; --ink:#1c2333; --muted:#6b7488; --line:#e3e7f0; --brand:#3b5bdb; --ok:#2f9e44; --warn:#e8590c; --bad:#c92a2a; }
+  :root {
+    --bg:#f3f5fb; --card:#ffffff; --ink:#172033; --muted:#6a7590; --line:#e4e8f2; --line-soft:#f0f2f9;
+    --brand:#4c5fe0; --brand-2:#7a5cf0; --brand-soft:#eef0ff;
+    --ok:#1f9d55; --warn:#e8710a; --bad:#d63a3a;
+    --radius:16px; --shadow:0 1px 2px rgba(23,32,51,.04), 0 8px 24px -12px rgba(23,32,51,.12);
+  }
   * { box-sizing:border-box; }
-  body { margin:0; font-family:"Sarabun","Segoe UI",Tahoma,sans-serif; background:var(--bg); color:var(--ink); }
-  header { background:linear-gradient(135deg,#364fc7,#5c7cfa); color:#fff; padding:20px 24px; }
-  header h1 { margin:0 0 4px; font-size:22px; } header p { margin:0; opacity:.9; font-size:14px; }
-  main { max-width:1000px; margin:0 auto; padding:20px; display:grid; gap:18px; }
-  .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:18px; }
-  .card h2 { margin:0 0 12px; font-size:17px; }
-  label { display:block; font-size:13px; color:var(--muted); margin:10px 0 4px; }
-  input, textarea { width:100%; padding:9px 10px; border:1px solid var(--line); border-radius:8px; font:inherit; background:#fff; color:var(--ink); }
-  textarea { min-height:70px; resize:vertical; }
-  .row { display:grid; grid-template-columns:1fr 1fr; gap:12px; } @media (max-width:640px){ .row{grid-template-columns:1fr;} }
-  button { cursor:pointer; border:0; border-radius:8px; padding:9px 14px; font:inherit; font-weight:600; background:var(--brand); color:#fff; }
-  button.sec { background:#e9ecef; color:var(--ink); } button.ok { background:var(--ok); } button.warn { background:var(--warn); } button.bad { background:var(--bad); }
+  html { scroll-behavior:smooth; }
+  body { margin:0; font-family:"Sarabun","Segoe UI",Tahoma,sans-serif; font-size:15px; line-height:1.55; background:var(--bg); color:var(--ink);
+         background-image:radial-gradient(900px 300px at 85% -50px, rgba(122,92,240,.10), transparent 70%), radial-gradient(700px 260px at 0% 0, rgba(76,95,224,.10), transparent 70%);
+         background-repeat:no-repeat; }
+
+  /* ---------- Hero ---------- */
+  header { position:relative; overflow:hidden; color:#fff; padding:34px 24px 74px;
+           background:linear-gradient(125deg,#2b3aa8 0%,#4c5fe0 48%,#7a5cf0 100%); }
+  header::before, header::after { content:""; position:absolute; border-radius:50%; background:rgba(255,255,255,.08); }
+  header::before { width:340px; height:340px; right:-90px; top:-150px; }
+  header::after  { width:220px; height:220px; left:-70px; bottom:-130px; }
+  .hero { position:relative; max-width:1040px; margin:0 auto; display:flex; align-items:center; gap:18px; }
+  .logo { flex:none; width:56px; height:56px; border-radius:16px; display:grid; place-items:center; font-size:28px;
+          background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.28); backdrop-filter:blur(6px); }
+  header h1 { margin:0 0 4px; font-family:"Prompt","Sarabun",sans-serif; font-weight:600; font-size:26px; letter-spacing:.2px; line-height:1.25; }
+  header p { margin:0; opacity:.88; font-size:14.5px; }
+  .chips { position:relative; max-width:1040px; margin:16px auto 0; display:flex; flex-wrap:wrap; gap:8px; }
+  .chips span { font-size:12.5px; padding:4px 12px; border-radius:999px; background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.22); }
+
+  /* ---------- Layout ---------- */
+  main { max-width:1040px; margin:-46px auto 40px; padding:0 20px; display:grid; gap:20px; position:relative; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:22px 24px; box-shadow:var(--shadow); }
+  .card h2 { margin:0 0 16px; font-family:"Prompt","Sarabun",sans-serif; font-weight:600; font-size:17px; display:flex; align-items:center; gap:10px; }
+  .step { flex:none; width:28px; height:28px; border-radius:9px; display:grid; place-items:center; font-size:14px; font-weight:700; color:#fff;
+          background:linear-gradient(135deg,var(--brand),var(--brand-2)); }
+  .head-row { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:6px; }
+  .head-row h2 { margin:0; }
+
+  /* ---------- Form ---------- */
+  label { display:block; font-size:13px; font-weight:600; color:var(--muted); margin:14px 0 6px; }
+  input, textarea { width:100%; padding:10px 13px; border:1.5px solid var(--line); border-radius:10px; font:inherit; background:#fafbff; color:var(--ink);
+                    transition:border-color .15s, box-shadow .15s, background .15s; }
+  input::placeholder, textarea::placeholder { color:#a6aec3; }
+  input:hover, textarea:hover { border-color:#cfd5e8; }
+  input:focus, textarea:focus { outline:0; border-color:var(--brand); background:#fff; box-shadow:0 0 0 4px rgba(76,95,224,.14); }
+  textarea { min-height:84px; resize:vertical; }
+  .row { display:grid; grid-template-columns:1fr 1fr; gap:14px; } @media (max-width:640px){ .row{grid-template-columns:1fr;} }
+  .row > div > label:first-child { margin-top:14px; }
+
+  /* ---------- Buttons ---------- */
+  button { cursor:pointer; border:0; border-radius:10px; padding:10px 18px; font:inherit; font-weight:600; font-size:14px; color:#fff;
+           background:linear-gradient(135deg,var(--brand),var(--brand-2)); box-shadow:0 4px 12px -4px rgba(76,95,224,.55);
+           transition:transform .12s, box-shadow .12s, filter .12s; }
+  button:hover:not(:disabled) { transform:translateY(-1px); filter:brightness(1.06); box-shadow:0 8px 16px -6px rgba(76,95,224,.55); }
+  button:active:not(:disabled) { transform:translateY(0); }
+  button:focus-visible { outline:3px solid rgba(76,95,224,.35); outline-offset:2px; }
+  button.sec  { background:#eef1f8; color:var(--ink); box-shadow:none; border:1px solid var(--line); }
+  button.sec:hover:not(:disabled) { background:#e4e9f5; box-shadow:none; filter:none; }
+  button.ok   { background:linear-gradient(135deg,#25b066,#1a8f4c); box-shadow:0 4px 12px -4px rgba(31,157,85,.55); }
+  button.warn { background:linear-gradient(135deg,#f58b2a,#df6a05); box-shadow:0 4px 12px -4px rgba(232,113,10,.55); }
+  button.bad  { background:linear-gradient(135deg,#e45151,#c82f2f); box-shadow:0 4px 12px -4px rgba(214,58,58,.5); }
   button:disabled { opacity:.5; cursor:not-allowed; }
+  #btnCreate { padding:12px 26px; font-size:15px; }
+
+  /* ---------- Wallet bar ---------- */
   .bar { display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
-  .muted { color:var(--muted); font-size:13px; } .mono { font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px; word-break:break-all; }
-  .badge { display:inline-block; padding:3px 10px; border-radius:999px; font-size:12px; font-weight:700; color:#fff; }
+  .wallet { padding:12px 14px; border:1px dashed #cfd6ee; border-radius:12px; background:var(--brand-soft); }
+  .dot { width:9px; height:9px; border-radius:50%; background:#aab2c8; flex:none; box-shadow:0 0 0 3px rgba(170,178,200,.25); }
+  .dot.on { background:var(--ok); box-shadow:0 0 0 3px rgba(31,157,85,.22); }
+  .muted { color:var(--muted); font-size:13px; }
+  .mono { font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:12px; word-break:break-all; }
+  #acct { flex:1; min-width:180px; }
+  #netInfo:not(:empty) { display:inline-block; margin:12px 0 0; padding:3px 11px; border-radius:999px; background:var(--line-soft); border:1px solid var(--line); }
+  .hint { margin:14px 0 0; padding:10px 14px; border-radius:10px; background:#fff8ec; border:1px solid #fbe3b6; color:#8a5a12; font-size:13px; }
+  #summary:not(:empty) { margin:6px 0 0; padding:9px 14px; border-radius:10px; background:var(--brand-soft); color:#33417f; }
+
+  /* ---------- Badges ---------- */
+  .badge { display:inline-block; padding:4px 12px; border-radius:999px; font-size:12px; font-weight:700; color:#fff; letter-spacing:.2px; white-space:nowrap; }
   .s0{background:#868e96}.s1{background:#1c7ed6}.s2{background:#7048e8}.s3{background:#e8590c}.s4{background:#2f9e44}.s5{background:#d6336c}.s6{background:#495057}
-  .job { border:1px solid var(--line); border-radius:10px; padding:14px; margin-top:12px; }
-  .job h3 { margin:0 0 6px; font-size:16px; display:flex; justify-content:space-between; gap:8px; flex-wrap:wrap; }
-  .kv { display:grid; grid-template-columns:140px 1fr; gap:4px 10px; font-size:14px; margin:8px 0; } @media (max-width:640px){ .kv{grid-template-columns:1fr;} }
-  .kv b { color:var(--muted); font-weight:600; }
-  .actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
-  .hist { margin-top:10px; border-top:1px dashed var(--line); padding-top:8px; font-size:13px; }
-  .hist div { padding:5px 0; border-bottom:1px solid #f1f3f9; }
-  #toast { position:fixed; bottom:18px; left:50%; transform:translateX(-50%); background:#212529; color:#fff; padding:11px 18px; border-radius:10px; max-width:90vw; display:none; z-index:9; font-size:14px; }
+
+  /* ---------- Job cards ---------- */
+  .job { position:relative; border:1px solid var(--line); border-left:5px solid #868e96; border-radius:14px; padding:18px 20px; margin-top:16px; background:#fff;
+         box-shadow:0 1px 2px rgba(23,32,51,.04); transition:box-shadow .15s, transform .15s; }
+  .job:hover { box-shadow:0 10px 26px -14px rgba(23,32,51,.25); transform:translateY(-1px); }
+  .job:has(.s0){border-left-color:#868e96} .job:has(.s1){border-left-color:#1c7ed6} .job:has(.s2){border-left-color:#7048e8}
+  .job:has(.s3){border-left-color:#e8590c} .job:has(.s4){border-left-color:#2f9e44} .job:has(.s5){border-left-color:#d6336c} .job:has(.s6){border-left-color:#495057}
+  .job h3 { margin:0 0 10px; font-family:"Prompt","Sarabun",sans-serif; font-weight:600; font-size:16.5px; display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; }
+  .kv { display:grid; grid-template-columns:150px 1fr; gap:0; font-size:14px; margin:6px 0 4px; border:1px solid var(--line-soft); border-radius:10px; overflow:hidden; } @media (max-width:640px){ .kv{grid-template-columns:1fr;} }
+  .kv > b, .kv > span { padding:8px 12px; border-bottom:1px solid var(--line-soft); }
+  .kv > b { color:var(--muted); font-weight:600; background:#fafbff; }
+  .kv > :nth-last-child(-n+2) { border-bottom:0; }
+  @media (max-width:640px){ .kv > b { border-bottom:0; padding-bottom:0; background:transparent; font-size:12.5px; } .kv > :nth-last-child(2) { border-bottom:0; } .kv > :nth-last-child(-n+2){ border-bottom:0; } .kv > span { padding-top:2px; } }
+  .actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; }
+  .actions:empty { display:none; }
+
+  /* ---------- History timeline ---------- */
+  details.hist { margin-top:14px; border-top:1px dashed var(--line); padding-top:10px; font-size:13px; }
+  details.hist summary { cursor:pointer; font-weight:600; color:var(--brand); list-style:none; user-select:none; }
+  details.hist summary::-webkit-details-marker { display:none; }
+  details.hist summary::before { content:"▸"; display:inline-block; margin-right:6px; transition:transform .15s; }
+  details.hist[open] summary::before { transform:rotate(90deg); }
+  .hist div { position:relative; padding:8px 0 8px 22px; border-bottom:0; }
+  .hist div::before { content:""; position:absolute; left:4px; top:15px; width:9px; height:9px; border-radius:50%; background:var(--brand); box-shadow:0 0 0 3px var(--brand-soft); }
+  .hist div::after { content:""; position:absolute; left:8px; top:26px; bottom:-8px; width:1px; background:var(--line); }
+  .hist div:last-child::after { display:none; }
+
+  /* ---------- Toast ---------- */
+  #toast { position:fixed; bottom:22px; left:50%; transform:translateX(-50%); background:#172033; color:#fff; padding:12px 20px; border-radius:12px;
+           max-width:90vw; display:none; z-index:9; font-size:14px; box-shadow:0 16px 40px -12px rgba(0,0,0,.45); border:1px solid rgba(255,255,255,.1); }
+
+  footer { text-align:center; color:var(--muted); font-size:12.5px; padding:0 20px 34px; }
+  @media (max-width:640px){ header { padding:26px 18px 66px; } header h1 { font-size:21px; } .card { padding:18px 16px; } main { padding:0 14px; } .hero { align-items:flex-start; } }
 </style>
 </head>
 <body>
 <header>
-  <h1>🧾 Freelance Escrow &amp; Smart Payment Platform</h1>
-  <p>DigitalWork Solutions — จ้างงานฟรีแลนซ์ ชำระเงินตามผลงานด้วย Smart Contract บน Ethereum</p>
+  <div class="hero">
+    <div class="logo">🧾</div>
+    <div>
+      <h1>Freelance Escrow &amp; Smart Payment Platform</h1>
+      <p>DigitalWork Solutions — จ้างงานฟรีแลนซ์ ชำระเงินตามผลงานด้วย Smart Contract บน Ethereum</p>
+    </div>
+  </div>
+  <div class="chips"><span>🔒 เงินล็อกใน Escrow</span><span>✅ จ่ายเมื่อตรวจรับงาน</span><span>⚖️ มีระบบตัดสินข้อพิพาท</span></div>
 </header>
 <main>
 
   <section class="card">
-    <h2>1) เชื่อมต่อกระเป๋าและ Smart Contract</h2>
-    <div class="bar">
+    <h2><span class="step">1</span>เชื่อมต่อกระเป๋าและ Smart Contract</h2>
+    <div class="bar wallet">
+      <span class="dot" id="dot"></span>
       <button id="btnConnect">เชื่อมต่อ MetaMask</button>
       <button id="btnSwitch" class="sec">เปลี่ยนบัญชี</button>
       <span id="acct" class="mono muted">ยังไม่ได้เชื่อมต่อ</span>
@@ -59,7 +151,7 @@
   </section>
 
   <section class="card" id="createCard">
-    <h2>2) สร้างข้อตกลงจ้างงาน (ผู้ว่าจ้าง)</h2>
+    <h2><span class="step">2</span>สร้างข้อตกลงจ้างงาน (ผู้ว่าจ้าง)</h2>
     <div class="row">
       <div><label for="title">ชื่อโครงการ</label><input id="title" placeholder="เช่น ออกแบบโลโก้ร้านกาแฟ"></div>
       <div><label for="fl">Wallet Address ของฟรีแลนซ์</label><input id="fl" placeholder="0x..."></div>
@@ -69,20 +161,21 @@
       <div><label for="amt">ค่าจ้าง (ETH)</label><input id="amt" type="number" step="0.0001" min="0" placeholder="0.01"></div>
       <div><label for="dl">กำหนดส่ง</label><input id="dl" type="datetime-local"></div>
     </div>
-    <div class="actions"><button id="btnCreate">สร้างข้อตกลง</button></div>
-    <p class="muted">หลังสร้างแล้ว ต้องกด “ฝากเงิน” ในรายการงานด้านล่างจึงจะเริ่มงานได้</p>
+    <div class="actions"><button id="btnCreate">＋ สร้างข้อตกลง</button></div>
+    <p class="hint">💡 หลังสร้างแล้ว ต้องกด “ฝากเงิน” ในรายการงานด้านล่างจึงจะเริ่มงานได้</p>
   </section>
 
   <section class="card">
-    <div class="bar" style="justify-content:space-between">
-      <h2 style="margin:0">3) รายการงานและสถานะ (Transaction Tracking)</h2>
-      <button id="btnRefresh" class="sec">รีเฟรช</button>
+    <div class="head-row">
+      <h2><span class="step">3</span>รายการงานและสถานะ (Transaction Tracking)</h2>
+      <button id="btnRefresh" class="sec">↻ รีเฟรช</button>
     </div>
     <p class="muted" id="summary"></p>
     <div id="jobs"></div>
   </section>
 
 </main>
+<footer>DigitalWork Solutions · Freelance Escrow DApp</footer>
 <div id="toast"></div>
 
 <script>
@@ -325,6 +418,11 @@ $("jobs").addEventListener("click", async (ev) => {
 });
 const d = new Date(Date.now() + 7 * 864e5); d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
 $("dl").value = d.toISOString().slice(0, 16);
+</script>
+<script>
+// สถานะจุดไฟเชื่อมต่อกระเป๋า (ตกแต่งเท่านั้น ไม่เกี่ยวกับตรรกะสัญญา)
+new MutationObserver(() => document.getElementById("dot").classList.toggle("on", /^0x/i.test(document.getElementById("acct").textContent.trim())))
+  .observe(document.getElementById("acct"), { childList:true, characterData:true, subtree:true });
 </script>
 </body>
 </html>
